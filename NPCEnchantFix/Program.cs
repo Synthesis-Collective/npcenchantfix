@@ -38,26 +38,36 @@ namespace NPCEnchantFix
                 if (npc.Perks == null) continue;
 
                 if (npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.SpellList)) continue;
-                
-                foreach (var perk in npc.Perks.Distinct())
-                {
-                    if (perk.Perk.FormKey.Equals(alchemySkillBoosts.FormKey))
-                    {
-                        state.PatchMod.Npcs.GetOrAddAsOverride(npc).Perks.Add(new PerkPlacement()
-                        {
-                            Perk = alchemySkillBoosts.FormKey,
-                            Rank = 1
-                        });
-                    }
 
-                    if (perk.Perk.FormKey.Equals(perkSkillBoosts.FormKey))
+                var hasPerkSkillBoosts = false;
+                var hasAlchemySkillBoosts = false;
+
+                foreach (var perk in npc.Perks)
+                {
+                    if (perk.Perk.FormKey.Equals(alchemySkillBoosts.FormKey)) hasAlchemySkillBoosts = true;
+                    if (perk.Perk.FormKey.Equals(perkSkillBoosts.FormKey)) hasPerkSkillBoosts = true;
+                }
+
+                if (hasAlchemySkillBoosts && hasPerkSkillBoosts) continue;
+
+                var modifiedNpc = state.PatchMod.Npcs.GetOrAddAsOverride(npc);
+
+                if (!hasAlchemySkillBoosts)
+                {
+                    modifiedNpc.Perks.Add(new PerkPlacement()
                     {
-                        state.PatchMod.Npcs.GetOrAddAsOverride(npc).Perks.Add(new PerkPlacement()
-                        {
-                            Perk = perkSkillBoosts.FormKey,
-                            Rank = 1
-                        });
-                    }
+                        Perk = alchemySkillBoosts.FormKey,
+                        Rank = 1
+                    });
+                }
+
+                if (!hasPerkSkillBoosts)
+                {
+                    modifiedNpc.Perks.Add(new PerkPlacement()
+                    {
+                        Perk = perkSkillBoosts.FormKey,
+                        Rank = 1
+                    });
                 }
             }
         }
