@@ -35,14 +35,12 @@ namespace NPCEnchantFix
 
             foreach (var npc in state.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>())
             {
-                if (npc.Perks == null) continue;
-
                 if (npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.SpellList)) continue;
 
                 var hasPerkSkillBoosts = false;
                 var hasAlchemySkillBoosts = false;
 
-                foreach (var perk in npc.Perks)
+                foreach (var perk in npc.Perks ?? Enumerable.Empty<IPerkPlacementGetter>())
                 {
                     if (perk.Perk.FormKey.Equals(alchemySkillBoosts.FormKey)) hasAlchemySkillBoosts = true;
                     if (perk.Perk.FormKey.Equals(perkSkillBoosts.FormKey)) hasPerkSkillBoosts = true;
@@ -51,6 +49,11 @@ namespace NPCEnchantFix
                 if (hasAlchemySkillBoosts && hasPerkSkillBoosts) continue;
 
                 var modifiedNpc = state.PatchMod.Npcs.GetOrAddAsOverride(npc);
+
+                if (modifiedNpc.Perks == null)
+                {
+                    modifiedNpc.Perks = new ExtendedList<PerkPlacement>();
+                }
 
                 if (!hasAlchemySkillBoosts)
                 {
