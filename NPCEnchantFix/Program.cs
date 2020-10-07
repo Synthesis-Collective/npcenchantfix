@@ -5,6 +5,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
+using Mutagen.Bethesda.FormKeys.SkyrimSE;
 
 namespace NPCEnchantFix
 {
@@ -28,33 +29,30 @@ namespace NPCEnchantFix
 
         public static void RunPatch(SynthesisState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            ModKey skyrimKey = "Skyrim.esm";
-            var skyrim = state.LoadOrder[skyrimKey];
-            var alchemySkillBoosts = skyrim.Mod?.Perks.RecordCache[new FormKey(skyrimKey, 0x0a725c)];
-            var perkSkillBoosts = skyrim.Mod?.Perks.RecordCache[new FormKey(skyrimKey, 0x0cf788)];
-
-            if (alchemySkillBoosts == null || perkSkillBoosts == null)
-            {
-                throw new Exception("AlchemySkillBoosts and/or PerkSkillBoosts not found in Skyrim.esm");
-            }
-
+            // Loop over all NPCs in the load order
             foreach (var npc in state.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>())
             {
+                // Skip NPC if it inherits spells from its template
                 if (npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.SpellList)) continue;
 
+                // Find if the NPC has PerkSkill or AlchemySkill perks
                 var hasPerkSkillBoosts = false;
                 var hasAlchemySkillBoosts = false;
 
                 foreach (var perk in npc.Perks ?? Enumerable.Empty<IPerkPlacementGetter>())
                 {
-                    if (perk.Perk.FormKey.Equals(alchemySkillBoosts.FormKey)) hasAlchemySkillBoosts = true;
-                    if (perk.Perk.FormKey.Equals(perkSkillBoosts.FormKey)) hasPerkSkillBoosts = true;
+                    if (perk.Perk.FormKey.Equals(Skyrim.Perk.AlchemySkillBoosts)) hasAlchemySkillBoosts = true;
+                    if (perk.Perk.FormKey.Equals(Skyrim.Perk.PerkSkillBoosts)) hasPerkSkillBoosts = true;
+                    if (hasAlchemySkillBoosts && hasPerkSkillBoosts) break;
                 }
 
+                // If NPC has both, it is safe
                 if (hasAlchemySkillBoosts && hasPerkSkillBoosts) continue;
 
+                // Otherwise, add the NPC to the patch
                 var modifiedNpc = state.PatchMod.Npcs.GetOrAddAsOverride(npc);
 
+                // Add missing perk
                 if (modifiedNpc.Perks == null)
                 {
                     modifiedNpc.Perks = new ExtendedList<PerkPlacement>();
@@ -64,7 +62,7 @@ namespace NPCEnchantFix
                 {
                     modifiedNpc.Perks.Add(new PerkPlacement()
                     {
-                        Perk = alchemySkillBoosts.FormKey,
+                        Perk = Skyrim.Perk.AlchemySkillBoosts,
                         Rank = 1
                     });
                 }
@@ -73,7 +71,7 @@ namespace NPCEnchantFix
                 {
                     modifiedNpc.Perks.Add(new PerkPlacement()
                     {
-                        Perk = perkSkillBoosts.FormKey,
+                        Perk = Skyrim.Perk.PerkSkillBoosts,
                         Rank = 1
                     });
                 }
@@ -81,4 +79,3 @@ namespace NPCEnchantFix
         }
     }
 }
-
