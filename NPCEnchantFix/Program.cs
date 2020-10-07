@@ -57,15 +57,25 @@ namespace NPCEnchantFix
                 {
                     modifiedNpc.Perks = new ExtendedList<PerkPlacement>();
                 }
-                modifiedNpc.Perks.Add(new PerkPlacement()
+
+                if (!hasAlchemySkillBoosts)
                 {
-                    Perk = hasAlchemySkillBoosts 
-                        ? Skyrim.Perk.PerkSkillBoosts 
-                        : Skyrim.Perk.AlchemySkillBoosts,
-                    Rank = 1
-                });
+                    modifiedNpc.Perks.Add(new PerkPlacement()
+                    {
+                        Perk = Skyrim.Perk.AlchemySkillBoosts,
+                        Rank = 1
+                    });
+                }
+
+                if (!hasPerkSkillBoosts)
+                {
+                    modifiedNpc.Perks.Add(new PerkPlacement()
+                    {
+                        Perk = Skyrim.Perk.PerkSkillBoosts,
+                        Rank = 1
+                    });
+                }
             }
         }
     }
 }
-
