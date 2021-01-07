@@ -32,7 +32,6 @@ namespace NPCEnchantFix
             // Loop over all NPCs in the load order
             foreach (var npc in state.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>())
             {
-                if (npc.IsDeleted) continue;
                 // Skip NPC if it inherits spells from its template
                 if (npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.SpellList)) continue;
 
