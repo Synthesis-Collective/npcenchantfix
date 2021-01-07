@@ -39,7 +39,7 @@ namespace NPCEnchantFix
                 var hasPerkSkillBoosts = false;
                 var hasAlchemySkillBoosts = false;
 
-                foreach (var perk in npc.Perks ?? Enumerable.Empty<IPerkPlacementGetter>())
+                foreach (var perk in npc.Perks.EmptyIfNull())
                 {
                     if (perk.Perk.FormKey.Equals(Skyrim.Perk.AlchemySkillBoosts)) hasAlchemySkillBoosts = true;
                     if (perk.Perk.FormKey.Equals(Skyrim.Perk.PerkSkillBoosts)) hasPerkSkillBoosts = true;
@@ -52,12 +52,10 @@ namespace NPCEnchantFix
                 // Otherwise, add the NPC to the patch
                 var modifiedNpc = state.PatchMod.Npcs.GetOrAddAsOverride(npc);
 
-                // Add missing perk
-                if (modifiedNpc.Perks == null)
-                {
-                    modifiedNpc.Perks = new ExtendedList<PerkPlacement>();
-                }
+                // Ensure perk list exists
+                modifiedNpc.Perks ??= new ExtendedList<PerkPlacement>();
 
+                // Add missing perks
                 if (!hasAlchemySkillBoosts)
                 {
                     modifiedNpc.Perks.Add(new PerkPlacement()
