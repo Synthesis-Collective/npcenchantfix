@@ -30,7 +30,7 @@ namespace NPCEnchantFix
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             // Loop over all NPCs in the load order
-            foreach (var npc in state.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>())
+            foreach (var npc in state.LoadOrder.PriorityOrder.Npc().WinningOverrides())
             {
                 try
                 {
