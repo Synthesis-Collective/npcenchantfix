@@ -16,15 +16,8 @@ namespace NPCEnchantFix
         {
             return await SynthesisPipeline.Instance
                 .AddPatch<ISkyrimMod, ISkyrimModGetter>(RunPatch)
-                .Run(args, new RunPreferences()
-                {
-                    ActionsForEmptyArgs = new RunDefaultPatcher()
-                    {
-                        IdentifyingModKey = "NPCEnchantFix.esp",
-                        TargetRelease = GameRelease.SkyrimSE
-                    }
-                }
-            );
+                .SetTypicalOpen(GameRelease.SkyrimSE, "NPCEnchantFix.esp")
+                .Run(args);
         }
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
@@ -43,8 +36,8 @@ namespace NPCEnchantFix
 
                     foreach (var perk in npc.Perks.EmptyIfNull())
                     {
-                        if (perk.Perk.FormKey.Equals(Skyrim.Perk.AlchemySkillBoosts)) hasAlchemySkillBoosts = true;
-                        if (perk.Perk.FormKey.Equals(Skyrim.Perk.PerkSkillBoosts)) hasPerkSkillBoosts = true;
+                        if (perk.Perk.Equals(Skyrim.Perk.AlchemySkillBoosts)) hasAlchemySkillBoosts = true;
+                        if (perk.Perk.Equals(Skyrim.Perk.PerkSkillBoosts)) hasPerkSkillBoosts = true;
                         if (hasAlchemySkillBoosts && hasPerkSkillBoosts) break;
                     }
 
